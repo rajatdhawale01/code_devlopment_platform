@@ -1,0 +1,268 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body.bg-gradient {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #222bff 0, #050816 40%, #000 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f9fafb;
+}
+
+body.bg-light {
+  min-height: 100vh;
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+.center-container {
+  width: 100%;
+  max-width: 420px;
+  padding: 1.5rem;
+}
+
+.card {
+  background: rgba(15, 23, 42, 0.92);
+  border-radius: 18px;
+  padding: 1.75rem 1.5rem;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.login-card {
+  text-align: left;
+}
+
+.app-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: #cbd5f5;
+  margin-bottom: 1.2rem;
+}
+
+.form label {
+  font-size: 0.85rem;
+  color: #e5e7eb;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.form input,
+.form select,
+textarea {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  background: #020617;
+  color: #e5e7eb;
+  margin-bottom: 0.8rem;
+}
+
+.form input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #4f46e5;
+  border-color: transparent;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(90deg, #6366f1, #14b8a6);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.3rem;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.btn-secondary {
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #64748b;
+  color: #e2e8f0;
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.btn-secondary:hover {
+  background: #1e293b;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.7rem;
+  font-size: 0.75rem;
+}
+
+.btn-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: #38bdf8;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+.helper-text {
+  margin-top: 1.2rem;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.helper-text ul {
+  margin-left: 1.2rem;
+  margin-top: 0.25rem;
+}
+
+/* Flash messages */
+.flash-container {
+  margin-bottom: 0.75rem;
+}
+
+.flash {
+  padding: 0.5rem 0.7rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+.flash-error {
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.6);
+  color: #fecaca;
+}
+
+/* Dashboard layout */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+  border-bottom: 1px solid #1f2937;
+  background: rgba(15, 23, 42, 0.96);
+}
+
+.logo {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #e5e7eb;
+}
+
+.user-pill {
+  background: #020617;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  margin-right: 0.6rem;
+}
+
+.main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr);
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.panel {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 18px;
+  padding: 1.3rem 1.2rem;
+  border: 1px solid #1f2937;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.55);
+}
+
+.panel h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.65rem;
+}
+
+.panel p {
+  font-size: 0.9rem;
+  color: #cbd5f5;
+  margin-bottom: 0.75rem;
+}
+
+.muted {
+  color: #94a3b8;
+}
+
+/* Role cards */
+.role-card {
+  margin-top: 0.5rem;
+  padding: 0.9rem 0.9rem;
+  border-radius: 14px;
+  font-size: 0.9rem;
+}
+
+.role-card h3 {
+  margin-bottom: 0.4rem;
+  font-size: 1rem;
+}
+
+.role-card ul {
+  margin-left: 1.1rem;
+  margin-bottom: 0.4rem;
+}
+
+.role-admin {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(248, 113, 113, 0.6);
+}
+
+.role-editor {
+  background: rgba(250, 204, 21, 0.06);
+  border: 1px solid rgba(250, 204, 21, 0.6);
+}
+
+.role-viewer {
+  background: rgba(34, 197, 94, 0.06);
+  border: 1px solid rgba(34, 197, 94, 0.6);
+}
+
+/* Code runner */
+.form-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+#language {
+  max-width: 150px;
+}
+
+.output-box {
+  background: #020617;
+  color: #e5e7eb;
+  border-radius: 10px;
+  padding: 0.7rem;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+}
