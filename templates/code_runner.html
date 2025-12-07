@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Coding Platform · Code Runner</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="bg-light">
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <span class="logo">CodeLab</span>
+    </div>
+    <div class="top-bar-right">
+      <nav style="margin-right: 1rem; font-size: 0.85rem;">
+        <a href="{{ url_for('dashboard') }}"
+           style="margin-right: 0.75rem; text-decoration:none; color:#cbd5f5;">
+          Dashboard
+        </a>
+        <a href="{{ url_for('code_page') }}"
+           style="margin-right: 0.75rem; text-decoration:none; color:#cbd5f5; font-weight:600;">
+          Code Runner
+        </a>
+      </nav>
+      <span class="user-pill">
+        {{ username }} ({{ role|capitalize }})
+      </span>
+      <a href="{{ url_for('logout') }}" class="btn-secondary btn-sm">Logout</a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-layout">
+    <section class="panel" style="grid-column: 1 / -1;">
+      <!-- Header row -->
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; margin-bottom:0.6rem;">
+        <div>
+          <h2 style="margin-bottom:0.25rem;">Student Code Lab</h2>
+          <p class="muted" style="font-size:0.9rem;">
+            Choose a language, type your code and run it.  
+            Use this like your personal practice playground during class.
+          </p>
+        </div>
+        <div style="text-align:right; font-size:0.8rem; color:#9ca3af;">
+          <div><strong>Shortcuts</strong></div>
+          <div>Tab → indent</div>
+          <div>Ctrl + Enter / ⌘ + Enter → run code</div>
+        </div>
+      </div>
+
+      <!-- Toolbar: language + buttons -->
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:0.7rem;">
+        <div class="form-inline" style="margin-bottom:0;">
+          <label for="language">Language</label>
+          <select id="language">
+            <option value="python">Python</option>
+            <option value="javascript">JavaScript</option>
+            <option value="cpp">C++</option>
+            <option value="java">Java</option>
+          </select>
+        </div>
+
+        <div style="display:flex; gap:0.5rem;">
+          <button id="run_btn" class="btn-primary" type="button" style="width:auto; padding-inline:1rem;">
+            ▶ Run Code
+          </button>
+          <button id="reset_btn" class="btn-secondary btn-sm" type="button">
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- MIDDLE: editor + tips (stacked / responsive) -->
+      <div style="display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:1rem; margin-bottom:1rem;">
+        <!-- CODE EDITOR -->
+        <div>
+          <label for="source_code" style="font-size:0.85rem; display:block; margin-bottom:0.25rem;">
+            Code editor
+          </label>
+          <textarea
+            id="source_code"
+            rows="16"
+            spellcheck="false"
+            placeholder="# Start typing your code here…"
+          ></textarea>
+          <p id="run_status" style="margin-top:0.35rem; font-size:0.8rem; color:#9ca3af;">
+            Tip: Try printing your name in the selected language.
+          </p>
+        </div>
+
+        <!-- TIPS / PRACTICE IDEAS -->
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+          <div style="
+            border-radius:14px;
+            padding:0.75rem 0.9rem;
+            border:1px dashed #1f2937;
+            background:#020617;
+            font-size:0.82rem;
+            color:#cbd5f5;
+          ">
+            <div style="font-weight:600; margin-bottom:0.25rem;">Practice ideas</div>
+            <ul style="margin-left:1.1rem;">
+              <li>Print your name 5 times using a loop.</li>
+              <li>Take two numbers and print their sum.</li>
+              <li>Write a function to check if a number is even or odd.</li>
+              <li>Change language and rewrite the same logic.</li>
+            </ul>
+          </div>
+
+          <div style="
+            border-radius:14px;
+            padding:0.75rem 0.9rem;
+            border:1px solid #1f2937;
+            background:#020617;
+            font-size:0.82rem;
+            color:#cbd5f5;
+          ">
+            <div style="font-weight:600; margin-bottom:0.25rem;">Hint</div>
+            <p>
+              If you don’t see any output, make sure you are using a print/log statement
+              (for example, <code>print()</code> in Python or <code>console.log()</code> in JavaScript).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM: FULL-WIDTH OUTPUT SECTION -->
+      <div style="margin-top:0.5rem;">
+        <h3 style="font-size:0.95rem; margin-bottom:0.3rem;">Output</h3>
+        <pre id="output_box" class="output-box">// Output will appear here...</pre>
+      </div>
+    </section>
+  </main>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const runBtn = document.getElementById("run_btn");
+      const resetBtn = document.getElementById("reset_btn");
+      const langSelect = document.getElementById("language");
+      const codeArea = document.getElementById("source_code");
+      const outputBox = document.getElementById("output_box");
+      const runStatus = document.getElementById("run_status");
+
+      // Sample starter snippets per language (student-friendly)
+      const starterSnippets = {
+        python: 'print("Hello from Python 👋")',
+        javascript: 'console.log("Hello from JavaScript 👋");',
+        cpp:
+`#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello from C++ 👋" << endl;
+    return 0;
+}`,
+        java:
+`public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello from Java 👋");
+    }
+}`
+      };
+
+      // Load default snippet for Python on first load
+      codeArea.value = starterSnippets.python;
+
+      async function runCode() {
+        const payload = {
+          language: langSelect.value,
+          source_code: codeArea.value
+        };
+
+        outputBox.textContent = "Running code...";
+        runStatus.textContent = "Running… please wait.";
+
+        try {
+          const res = await fetch("{{ url_for('run_code') }}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+          outputBox.textContent = data.output ?? "No output received.";
+          runStatus.textContent = "Finished running. Check the output below.";
+        } catch (err) {
+          console.error(err);
+          outputBox.textContent = "Error calling API.";
+          runStatus.textContent = "Something went wrong while running the code.";
+        }
+      }
+
+      runBtn.addEventListener("click", runCode);
+
+      resetBtn.addEventListener("click", () => {
+        codeArea.value = starterSnippets[langSelect.value] || "";
+        outputBox.textContent = "// Output will appear here...";
+        runStatus.textContent = "Editor reset. Try modifying the example and run again.";
+      });
+
+      // Change snippet when language changes (helpful for students)
+      langSelect.addEventListener("change", () => {
+        codeArea.value = starterSnippets[langSelect.value] || "";
+        outputBox.textContent = "// Output will appear here...";
+        runStatus.textContent = `Starter snippet loaded for ${langSelect.value}. Modify it and press Run.`;
+      });
+
+      // Editor keyboard behaviour:
+      // - Tab => insert 4 spaces
+      // - Enter with Ctrl/Cmd => run code
+      // - Plain Enter => auto-indent (especially for Python blocks)
+      codeArea.addEventListener("keydown", function (e) {
+        // Ctrl+Enter / Cmd+Enter => run code
+        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          runCode();
+          return;
+        }
+
+        // Tab => insert spaces instead of leaving the textarea
+        if (e.key === "Tab") {
+          e.preventDefault();
+          const start = this.selectionStart;
+          const end = this.selectionEnd;
+          const indent = "    ";
+          const value = this.value;
+          this.value = value.substring(0, start) + indent + value.substring(end);
+          this.selectionStart = this.selectionEnd = start + indent.length;
+          return;
+        }
+
+        // Plain Enter => smart auto-indent
+        if (e.key === "Enter") {
+          e.preventDefault();
+
+          const value = this.value;
+          const cursorPos = this.selectionStart;
+
+          // Find the start of the current line
+          const lastNewline = value.lastIndexOf("\n", cursorPos - 1);
+          const lineStart = lastNewline === -1 ? 0 : lastNewline + 1;
+          const currentLine = value.substring(lineStart, cursorPos);
+
+          // Get existing indentation of current line
+          const matchIndent = currentLine.match(/^[\t ]*/);
+          let baseIndent = matchIndent ? matchIndent[0] : "";
+
+          // If Python and current line ends with ':', add one more indent level
+          let extraIndent = "";
+          if (langSelect.value === "python" && /:\s*$/.test(currentLine)) {
+            extraIndent = "    ";
+          }
+
+          const newIndent = baseIndent + extraIndent;
+
+          // Insert newline + indentation
+          const before = value.substring(0, cursorPos);
+          const after = value.substring(cursorPos);
+          this.value = before + "\n" + newIndent + after;
+
+          // Move cursor to after the indentation
+          const newPos = cursorPos + 1 + newIndent.length;
+          this.selectionStart = this.selectionEnd = newPos;
+        }
+      });
+    });
+  </script>

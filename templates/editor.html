@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CodeLab · Problem Bank</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="bg-light">
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <span class="logo">CodeLab</span>
+    </div>
+    <div class="top-bar-right">
+      <nav style="margin-right: 1rem; font-size: 0.85rem;">
+        <a href="{{ url_for('dashboard') }}"
+           style="margin-right: 0.75rem; text-decoration:none; color:#cbd5f5;">
+          Dashboard
+        </a>
+        <a href="{{ url_for('code_page') }}"
+           style="margin-right: 0.75rem; text-decoration:none; color:#cbd5f5;">
+          Code Runner
+        </a>
+        <a href="{{ url_for('editor_page') }}"
+           style="margin-right: 0.75rem; text-decoration:none; color:#cbd5f5; font-weight:600;">
+          Problem Bank
+        </a>
+      </nav>
+      <span class="user-pill">
+        {{ username }} ({{ role|capitalize }})
+      </span>
+      <a href="{{ url_for('logout') }}" class="btn-secondary btn-sm">Logout</a>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main-layout">
+    <section class="panel" style="grid-column: 1 / -1;">
+      <h2>Problem Bank</h2>
+      <p class="muted" style="font-size:0.9rem;">
+        Create, update and manage coding problems for your students.  
+        View mode is available from the Viewer panel.
+      </p>
+
+      <!-- FLASH MESSAGES -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-container" style="margin-top:0.6rem;">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <!-- PROBLEM LIST TABLE -->
+      <div style="margin-top:1rem;">
+        <h3 style="font-size:0.95rem; margin-bottom:0.4rem;">Existing problems</h3>
+        {% if problems %}
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+              <thead>
+                <tr style="border-bottom:1px solid #1f2937;">
+                  <th style="text-align:left; padding:0.4rem 0.3rem;">ID</th>
+                  <th style="text-align:left; padding:0.4rem 0.3rem;">Title</th>
+                  <th style="text-align:left; padding:0.4rem 0.3rem;">Difficulty</th>
+                  <th style="text-align:left; padding:0.4rem 0.3rem;">Tags</th>
+                  <th style="text-align:left; padding:0.4rem 0.3rem;">Statement (preview)</th>
+                  <th style="text-align:left; padding:0.4rem 0.3rem;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for p in problems %}
+                  <tr style="border-bottom:1px solid #111827;">
+                    <td style="padding:0.35rem 0.3rem;">{{ p.id }}</td>
+                    <td style="padding:0.35rem 0.3rem;">{{ p.title }}</td>
+                    <td style="padding:0.35rem 0.3rem;">{{ p.difficulty }}</td>
+                    <td style="padding:0.35rem 0.3rem;">{{ p.tags }}</td>
+                    <td style="padding:0.35rem 0.3rem; max-width:280px;">
+                      {{ p.statement[:120] }}{% if p.statement|length > 120 %}…{% endif %}
+                    </td>
+                    <td style="padding:0.35rem 0.3rem;">
+                      <a href="{{ url_for('problem_detail', pid=p.id) }}"
+                         class="btn-link" style="font-size:0.8rem;">
+                        View
+                      </a>
+
+                      <a href="{{ url_for('editor_page', edit_id=p.id) }}"
+                         class="btn-link" style="font-size:0.8rem; margin-left:0.3rem;">
+                        Edit
+                      </a>
+
+                      <form method="POST" style="display:inline; margin-left:0.3rem;">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="problem_id" value="{{ p.id }}">
+                        <button type="submit"
+                                class="btn-secondary btn-sm"
+                                style="font-size:0.75rem;">
+                          Delete
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="muted" style="margin-top:0.3rem;">
+            No problems yet. Use the form below to create the first one.
+          </p>
+        {% endif %}
+      </div>
+
+      <!-- ADD / EDIT FORM -->
+      <div style="margin-top:1.4rem;">
+        {% if edit_problem %}
+          <h3 style="font-size:0.95rem; margin-bottom:0.4rem;">
+            Edit problem #{{ edit_problem.id }}
+          </h3>
+          <p class="muted" style="font-size:0.8rem; margin-bottom:0.4rem;">
+            Make changes and click <strong>Save changes</strong>.  
+            <a href="{{ url_for('editor_page') }}" class="btn-link">Cancel edit</a>
+          </p>
+          <form method="POST" class="form">
+            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="problem_id" value="{{ edit_problem.id }}">
+
+            <label for="title" style="font-size:0.85rem;">Title</label>
+            <input id="title" name="title" type="text"
+                   value="{{ edit_problem.title }}" required>
+
+            <label for="difficulty" style="font-size:0.85rem;">Difficulty</label>
+            <select id="difficulty" name="difficulty" required>
+              <option value="Easy"   {{ "selected" if edit_problem.difficulty == "Easy"   else "" }}>Easy</option>
+              <option value="Medium" {{ "selected" if edit_problem.difficulty == "Medium" else "" }}>Medium</option>
+              <option value="Hard"   {{ "selected" if edit_problem.difficulty == "Hard"   else "" }}>Hard</option>
+            </select>
+
+            <label for="tags" style="font-size:0.85rem;">Tags (comma separated)</label>
+            <input id="tags" name="tags" type="text"
+                   value="{{ edit_problem.tags or '' }}">
+
+            <label for="statement" style="font-size:0.85rem;">Problem statement</label>
+            <textarea id="statement" name="statement" rows="5">{{ edit_problem.statement }}</textarea>
+
+            <button type="submit" class="btn-primary" style="margin-top:0.6rem;">
+              💾 Save changes
+            </button>
+          </form>
+        {% else %}
+          <h3 style="font-size:0.95rem; margin-bottom:0.4rem;">Add a new problem</h3>
+          <form method="POST" class="form">
+            <input type="hidden" name="action" value="add">
+
+            <label for="title" style="font-size:0.85rem;">Title</label>
+            <input id="title" name="title" type="text" required>
+
+            <label for="difficulty" style="font-size:0.85rem;">Difficulty</label>
+            <select id="difficulty" name="difficulty" required>
+              <option value="">-- select --</option>
+              <option value="Easy">Easy</option>
+              <option value="Medium">Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+
+            <label for="tags" style="font-size:0.85rem;">Tags (comma separated)</label>
+            <input id="tags" name="tags" type="text" placeholder="loops, arrays, strings">
+
+            <label for="statement" style="font-size:0.85rem;">Problem statement</label>
+            <textarea id="statement" name="statement" rows="5"
+                      placeholder="Describe the problem clearly, with input/output format and examples."></textarea>
+
+            <button type="submit" class="btn-primary" style="margin-top:0.6rem;">
+              ➕ Add Problem
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </section>
+  </main>
+</body>
+</html>

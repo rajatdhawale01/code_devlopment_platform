@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CodeLab · User Management</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="bg-light">
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <span class="logo">CodeLab</span>
+    </div>
+    <div class="top-bar-right">
+      <nav style="margin-right: 1rem; font-size: 0.85rem;">
+        <a href="{{ url_for('dashboard') }}"
+           style="margin-right: 0.75rem; text-decoration:none; color:#cbd5f5;">
+          Dashboard
+        </a>
+        <a href="{{ url_for('code_page') }}"
+           style="margin-right: 0.75rem; text-decoration:none; color:#cbd5f5;">
+          Code Runner
+        </a>
+        <a href="{{ url_for('admin_page') }}"
+           style="margin-right: 0.75rem; text-decoration:none; color:#cbd5f5; font-weight:600;">
+          Admin
+        </a>
+      </nav>
+      <span class="user-pill">
+        {{ username }} ({{ role|capitalize }})
+      </span>
+      <a href="{{ url_for('logout') }}" class="btn-secondary btn-sm">Logout</a>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main-layout">
+    <section class="panel" style="grid-column: 1 / -1;">
+      <h2>User Management</h2>
+      <p class="muted" style="font-size:0.9rem;">
+        Add new users, update their roles, or remove accounts.  
+        <br>Note: You cannot delete your own account from here.
+      </p>
+
+      <!-- FLASH MESSAGES -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-container" style="margin-top:0.6rem;">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <!-- CURRENT USERS TABLE -->
+      <div style="margin-top:1rem;">
+        <h3 style="font-size:0.95rem; margin-bottom:0.4rem;">Existing users</h3>
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+            <thead>
+              <tr style="border-bottom:1px solid #1f2937;">
+                <th style="text-align:left; padding:0.4rem 0.3rem;">Username</th>
+                <th style="text-align:left; padding:0.4rem 0.3rem;">Role</th>
+                <th style="text-align:left; padding:0.4rem 0.3rem;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in users %}
+                <tr style="border-bottom:1px solid #111827;">
+                  <td style="padding:0.35rem 0.3rem;">{{ u.username }}</td>
+                  <td style="padding:0.35rem 0.3rem;">
+                    <!-- Inline role update form -->
+                    <form method="POST" style="display:inline-flex; gap:0.3rem; align-items:center;">
+                      <input type="hidden" name="action" value="update_role">
+                      <input type="hidden" name="username_to_update" value="{{ u.username }}">
+
+                      <select name="new_role" style="font-size:0.8rem; padding:0.1rem 0.25rem;">
+                        <option value="admin"  {{ "selected" if u.role == "admin"  else "" }}>admin</option>
+                        <option value="editor" {{ "selected" if u.role == "editor" else "" }}>editor</option>
+                        <option value="viewer" {{ "selected" if u.role == "viewer" else "" }}>viewer</option>
+                      </select>
+
+                      <button type="submit" class="btn-secondary btn-sm" style="font-size:0.75rem;">
+                        Save
+                      </button>
+                    </form>
+                  </td>
+                  <td style="padding:0.35rem 0.3rem;">
+                    {% if u.username != username %}
+                      <form method="POST" style="display:inline;">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="username_to_delete" value="{{ u.username }}">
+                        <button type="submit" class="btn-secondary btn-sm" style="font-size:0.75rem;">
+                          Delete
+                        </button>
+                      </form>
+                    {% else %}
+                      <span style="font-size:0.75rem; color:#9ca3af;">(You)</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADD USER FORM -->
+      <div style="margin-top:1.4rem;">
+        <h3 style="font-size:0.95rem; margin-bottom:0.4rem;">Add a new user</h3>
+        <form method="POST" class="form" style="max-width:420px;">
+          <input type="hidden" name="action" value="add">
+
+          <label for="username" style="font-size:0.85rem;">Username</label>
+          <input id="username" name="username" type="text" required>
+
+          <label for="password" style="font-size:0.85rem;">Password</label>
+          <input id="password" name="password" type="password" required>
+
+          <label for="role" style="font-size:0.85rem;">Role</label>
+          <select id="role" name="role" required>
+            <option value="">-- select role --</option>
+            <option value="admin">admin</option>
+            <option value="editor">editor</option>
+            <option value="viewer">viewer</option>
+          </select>
+
+          <button type="submit" class="btn-primary" style="margin-top:0.6rem;">
+            ➕ Add User
+          </button>
+        </form>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

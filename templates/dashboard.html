@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Coding Platform · Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="bg-light">
+  <!-- ===== TOP BAR (logo + user) ===== -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <span class="logo">CodeLab</span>
+    </div>
+    <div class="top-bar-right">
+      <span class="user-pill">
+        {{ username }} ({{ role|capitalize }})
+      </span>
+      <a href="{{ url_for('logout') }}" class="btn-secondary btn-sm">Logout</a>
+    </div>
+  </header>
+
+  <!-- ===== MAIN LAYOUT: Sidebar (left) + Main content (right) ===== -->
+  <main style="
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 1.5rem;
+    padding: 1.5rem;
+  ">
+    <!-- ===== LEFT: NAV / "VIEW" SECTION ===== -->
+    <aside class="panel" style="height: 100%;">
+      <h2 style="font-size:1rem; margin-bottom:0.75rem;">Navigation</h2>
+      <nav style="display:flex; flex-direction:column; gap:0.4rem; font-size:0.9rem;">
+        <a href="{{ url_for('dashboard') }}" class="btn-link" style="margin:0;">
+          🏠 Overview
+        </a>
+        <a href="{{ url_for('code_page') }}" class="btn-link" style="margin:0;">
+          💻 Code Runner
+        </a>
+
+        {% if role == "admin" %}
+          <hr style="border-color:#1f2937; margin:0.6rem 0;">
+          <span style="font-size:0.8rem; color:#9ca3af; text-transform:uppercase;">
+            Admin tools
+          </span>
+          <a href="{{ url_for('admin_page') }}" class="btn-link" style="margin:0;">
+            👤 User Management
+          </a>
+          <a href="{{ url_for('editor_page') }}" class="btn-link" style="margin:0;">
+            📚 Problem Bank
+          </a>
+          <a href="{{ url_for('viewer_page') }}" class="btn-link" style="margin:0;">
+            📈 Student View
+          </a>
+
+        {% elif role == "editor" %}
+          <hr style="border-color:#1f2937; margin:0.6rem 0;">
+          <span style="font-size:0.8rem; color:#9ca3af; text-transform:uppercase;">
+            Editor tools
+          </span>
+          <a href="{{ url_for('editor_page') }}" class="btn-link" style="margin:0;">
+            📚 Problem Bank
+          </a>
+          <a href="{{ url_for('viewer_page') }}" class="btn-link" style="margin:0;">
+            👀 Preview as Student
+          </a>
+
+        {% elif role == "viewer" %}
+          <hr style="border-color:#1f2937; margin:0.6rem 0;">
+          <span style="font-size:0.8rem; color:#9ca3af; text-transform:uppercase;">
+            Practice
+          </span>
+          <a href="{{ url_for('viewer_page') }}" class="btn-link" style="margin:0;">
+            🧩 Browse Problems
+          </a>
+          <a href="{{ url_for('code_page') }}" class="btn-link" style="margin:0;">
+            ⚡ Start Coding
+          </a>
+        {% endif %}
+      </nav>
+
+      <!-- Small stats in sidebar -->
+      <hr style="border-color:#1f2937; margin:1rem 0 0.7rem;">
+      <h3 style="font-size:0.9rem; margin-bottom:0.35rem;">Quick stats</h3>
+      <ul style="font-size:0.8rem; color:#cbd5f5; margin-left:1.1rem;">
+        <li><strong>{{ total_problems }}</strong> problems</li>
+        <li><strong>{{ total_users }}</strong> users</li>
+      </ul>
+    </aside>
+
+    <!-- ===== RIGHT: MAIN LANDING CONTENT ===== -->
+    <section class="panel" style="min-height: 420px; display:flex; flex-direction:column; gap:1.2rem;">
+      <!-- Hero section -->
+      <div>
+        <p style="font-size:0.85rem; color:#9ca3af; text-transform:uppercase; letter-spacing:0.08em;">
+          Welcome to
+        </p>
+        <h1 style="font-size:1.7rem; font-weight:700; margin-top:0.15rem;">
+          CodeLab – Practice, Create & Review Code in One Place
+        </h1>
+        <p class="muted" style="margin-top:0.5rem;">
+          This platform is designed for coding practice, problem management and student evaluation.  
+          Run code in multiple languages, design your own problems, and track learning progress —
+          all inside a single, role-based workspace.
+        </p>
+
+        <!-- Role-specific tagline -->
+        <div style="
+          margin-top:0.8rem;
+          padding:0.6rem 0.8rem;
+          border-radius:12px;
+          border:1px solid #1f2937;
+          background:#020617;
+          font-size:0.88rem;
+        ">
+          {% if role == "admin" %}
+            <strong>You’re logged in as Admin.</strong>
+            You control users, roles, and the global problem bank.
+          {% elif role == "editor" %}
+            <strong>You’re logged in as Editor.</strong>
+            You can create, update and organize coding questions for your students.
+          {% elif role == "viewer" %}
+            <strong>You’re logged in as Viewer.</strong>
+            Your job is to practice, submit solutions, and improve daily.
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Feature grid -->
+      <div style="display:flex; flex-wrap:wrap; gap:0.9rem; margin-top:0.4rem;">
+        <div style="
+          flex:1 1 180px;
+          border-radius:16px;
+          padding:0.8rem 0.9rem;
+          border:1px solid #1f2937;
+          background:#020617;
+          font-size:0.85rem;
+        ">
+          <h3 style="font-size:0.95rem; margin-bottom:0.35rem;">💻 Code Runner</h3>
+          <p style="color:#cbd5f5;">
+            Execute Python directly in the browser, with support for other languages
+            (mocked for now). Perfect for quick tests and classroom demos.
+          </p>
+          <a href="{{ url_for('code_page') }}" class="btn-link" style="margin-top:0.4rem; display:inline-block;">
+            Open Code Runner →
+          </a>
+        </div>
+
+        <div style="
+          flex:1 1 180px;
+          border-radius:16px;
+          padding:0.8rem 0.9rem;
+          border:1px solid #1f2937;
+          background:#020617;
+          font-size:0.85rem;
+        ">
+          <h3 style="font-size:0.95rem; margin-bottom:0.35rem;">📚 Problem Bank</h3>
+          <p style="color:#cbd5f5;">
+            Total problems: <strong>{{ total_problems }}</strong><br>
+            Design questions with difficulty, tags and detailed statements to match your syllabus.
+          </p>
+          {% if role in ["admin", "editor"] %}
+            <a href="{{ url_for('editor_page') }}" class="btn-link" style="margin-top:0.4rem; display:inline-block;">
+              Manage Problems →
+            </a>
+          {% else %}
+            <a href="{{ url_for('viewer_page') }}" class="btn-link" style="margin-top:0.4rem; display:inline-block;">
+              Browse Problems →
+            </a>
+          {% endif %}
+        </div>
+
+        <div style="
+          flex:1 1 180px;
+          border-radius:16px;
+          padding:0.8rem 0.9rem;
+          border:1px solid #1f2937;
+          background:#020617;
+          font-size:0.85rem;
+        ">
+          <h3 style="font-size:0.95rem; margin-bottom:0.35rem;">📊 Difficulty spread</h3>
+          {% if difficulties %}
+            <ul style="margin-top:0.35rem; margin-left:1.1rem; color:#cbd5f5;">
+              {% for diff, count in difficulties.items() %}
+                <li>
+                  <strong>{{ diff }}</strong> – {{ count }} problem{{ "s" if count != 1 else "" }}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p style="color:#cbd5f5; margin-top:0.3rem;">
+              No problems yet – add some in the Editor panel.
+            </p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Call to action -->
+      <div style="margin-top:auto; font-size:0.85rem; color:#9ca3af;">
+        Tip: open two tabs – one with the <strong>Editor</strong> and one with the
+        <strong>Code Runner</strong> – to demonstrate problem creation and live solving
+        during your class.
+      </div>
+    </section>
+  </main>
+</body>
+</html>

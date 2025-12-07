@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CodeLab · Student Panel</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="bg-light">
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <span class="logo">CodeLab</span>
+    </div>
+    <div class="top-bar-right">
+      <nav style="margin-right: 1rem; font-size: 0.85rem;">
+        <a href="{{ url_for('dashboard') }}"
+           style="margin-right: 0.75rem; text-decoration:none; color:#cbd5f5;">
+          Dashboard
+        </a>
+        <a href="{{ url_for('code_page') }}"
+           style="margin-right: 0.75rem; text-decoration:none; color:#cbd5f5;">
+          Code Runner
+        </a>
+        <a href="{{ url_for('viewer_page') }}"
+           style="margin-right: 0.75rem; text-decoration:none; color:#cbd5f5; font-weight:600;">
+          Student Panel
+        </a>
+      </nav>
+      <span class="user-pill">
+        {{ username }} ({{ role|capitalize }})
+      </span>
+      <a href="{{ url_for('logout') }}" class="btn-secondary btn-sm">Logout</a>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main-layout">
+    <section class="panel" style="grid-column: 1 / -1;">
+      <h2>Practice Problems</h2>
+      <p class="muted" style="font-size:0.9rem;">
+        Browse problems, read the statements carefully, then solve them in the Code Runner.  
+        Use the search and filters to quickly find questions based on topic or difficulty.
+      </p>
+
+      <!-- FILTERS -->
+      <div style="
+        display:flex;
+        flex-wrap:wrap;
+        gap:0.75rem;
+        align-items:flex-end;
+        margin-top:0.8rem;
+        margin-bottom:0.8rem;
+        font-size:0.9rem;
+      ">
+        <div style="flex:1 1 180px;">
+          <label for="search_box" style="font-size:0.8rem; display:block; margin-bottom:0.2rem;">
+            🔍 Search by title or tags
+          </label>
+          <input id="search_box"
+                 type="text"
+                 placeholder="e.g. string, loop, array..."
+                 style="width:100%; padding:0.35rem 0.45rem; font-size:0.9rem;">
+        </div>
+
+        <div style="flex:0 0 160px;">
+          <label for="filter_difficulty" style="font-size:0.8rem; display:block; margin-bottom:0.2rem;">
+            📊 Difficulty
+          </label>
+          <select id="filter_difficulty" style="width:100%; padding:0.35rem 0.45rem; font-size:0.9rem;">
+            <option value="">All levels</option>
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+          </select>
+        </div>
+
+        <div style="flex:0 0 auto; font-size:0.8rem; color:#9ca3af;">
+          <div><strong>Total problems:</strong> {{ problems|length }}</div>
+          <div style="margin-top:0.1rem;">
+            Tip: start with <strong>Easy</strong>, then move to <strong>Medium</strong>.
+          </div>
+        </div>
+      </div>
+
+      <!-- PROBLEM CARDS -->
+      {% if problems %}
+        <div id="problems_container"
+             style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:0.9rem;">
+          {% for p in problems %}
+            <article class="problem-card"
+                     data-title="{{ p.title|lower }}"
+                     data-tags="{{ (p.tags or '')|lower }}"
+                     data-difficulty="{{ p.difficulty }}">
+              <div style="
+                border-radius:16px;
+                padding:0.8rem 0.9rem;
+                border:1px solid #1f2937;
+                background:#020617;
+                height:100%;
+                display:flex;
+                flex-direction:column;
+                justify-content:space-between;
+              ">
+                <div>
+                  <div style="display:flex; justify-content:space-between; gap:0.4rem;">
+                    <h3 style="font-size:1rem; margin-bottom:0.15rem;">
+                      {{ p.title }}
+                    </h3>
+                    <!-- Difficulty badge -->
+                    {% set diff = p.difficulty %}
+                    {% set badge_color =
+                      "#22c55e" if diff == "Easy" else
+                      "#eab308" if diff == "Medium" else
+                      "#ef4444"
+                    %}
+                    <span style="
+                      align-self:flex-start;
+                      font-size:0.75rem;
+                      padding:0.15rem 0.45rem;
+                      border-radius:999px;
+                      background:{{ badge_color }};
+                      color:#020617;
+                      font-weight:600;
+                      white-space:nowrap;
+                    ">
+                      {{ diff }}
+                    </span>
+                  </div>
+
+                  {% if p.tags %}
+                    <p style="font-size:0.8rem; color:#9ca3af; margin-top:0.1rem;">
+                      Tags:
+                      {% for tag in p.tags.split(",") %}
+                        <span style="border-radius:999px; border:1px solid #1f2937; padding:0.05rem 0.4rem; margin-right:0.1rem;">
+                          {{ tag.strip() }}
+                        </span>
+                      {% endfor %}
+                    </p>
+                  {% endif %}
+
+                  <p style="font-size:0.85rem; color:#cbd5f5; margin-top:0.45rem;">
+                    {{ p.statement[:140] }}{% if p.statement|length > 140 %}…{% endif %}
+                  </p>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.6rem;">
+                  <a href="{{ url_for('problem_detail', pid=p.id) }}"
+                     class="btn-link"
+                     style="font-size:0.85rem;">
+                    📄 View statement
+                  </a>
+                  <a href="{{ url_for('code_page') }}"
+                     class="btn-secondary btn-sm"
+                     style="font-size:0.8rem;">
+                    💻 Solve in Code Runner
+                  </a>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted" style="margin-top:0.5rem;">
+          No problems available yet. Please ask your instructor or admin to add problems in the Editor panel.
+        </p>
+      {% endif %}
+    </section>
+  </main>
+
+  <!-- SIMPLE FILTER SCRIPT -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const searchBox = document.getElementById("search_box");
+      const difficultySelect = document.getElementById("filter_difficulty");
+      const cards = Array.from(document.querySelectorAll(".problem-card"));
+
+      function applyFilters() {
+        const query = (searchBox.value || "").toLowerCase().trim();
+        const diff = difficultySelect.value;
+
+        cards.forEach(card => {
+          const title = card.getAttribute("data-title") || "";
+          const tags = card.getAttribute("data-tags") || "";
+          const cardDiff = card.getAttribute("data-difficulty") || "";
+
+          const matchesText =
+            !query ||
+            title.includes(query) ||
+            tags.includes(query);
+
+          const matchesDiff =
+            !diff || cardDiff === diff;
+
+          card.style.display = (matchesText && matchesDiff) ? "" : "none";
+        });
+      }
+
+      searchBox.addEventListener("input", applyFilters);
+      difficultySelect.addEventListener("change", applyFilters);
+    });
+  </script>
+</body>
+</html>
